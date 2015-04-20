@@ -1,0 +1,6 @@
+/home/kripton/Документы/AndroidProjects/Grapher/app/build/intermediates/classes/debug
+/home/kripton/Документы/AndroidProjects/Grapher/app/build/intermediates/pre-dexed/debug/support-annotations-21.0.3-9eca17ae00db76c94563e76db5758e0fbe394a1d.jar
+/home/kripton/Документы/AndroidProjects/Grapher/app/build/intermediates/pre-dexed/debug/android_svg-2596eb21a25ab6db9e5cc2fa5aa09e2c8f342f4b.jar
+/home/kripton/Документы/AndroidProjects/Grapher/app/build/intermediates/pre-dexed/debug/internal_impl-21.0.3-bc23f38e9a8d4a690a889345e03940b240eb3112.jar
+/home/kripton/Документы/AndroidProjects/Grapher/app/build/intermediates/pre-dexed/debug/classes-3f289434a706d14f16dd829e0d894095e7488a3c.jar
+/home/kripton/Документы/AndroidProjects/Grapher/app/build/intermediates/pre-dexed/debug/classes-ac19fe9c184499c19467795a88510dfadca62de4.jar

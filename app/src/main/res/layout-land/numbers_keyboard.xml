@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Keyboard xmlns:android="http://schemas.android.com/apk/res/android"
+    android:keyWidth="13%p"
+    android:keyHeight="10%p"
+    android:horizontalGap="0px"
+    android:verticalGap="0px"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
+    
+ 	<Row android:keyWidth="13%p">
+ 	    <Key android:codes="0" android:keyLabel="1" />
+ 	    <Key android:codes="1" android:keyLabel="2" />
+ 	    <Key android:codes="2" android:keyLabel="3" />
+ 	    <Key android:codes="3" android:keyLabel="+" android:horizontalGap="11%p" />
+ 	    <Key android:codes="4" android:keyLabel="x" android:horizontalGap="11%p" />
+ 	    <Key android:codes="5" android:keyLabel="ABC" />
+  	</Row>
+  	
+ 	<Row>
+ 	    <Key android:codes="6" android:keyLabel="4" />
+ 	    <Key android:codes="7" android:keyLabel="5" />
+ 	    <Key android:codes="8" android:keyLabel="6" />
+ 	    <Key android:codes="9" android:keyLabel="-" android:horizontalGap="11%p" />
+ 	    <Key android:codes="10" android:keyLabel="(" android:horizontalGap="11%p" />
+ 	    <Key android:codes="11" android:keyLabel="SIN" />								
+ 	</Row>
+ 	
+ 	<Row>
+ 	    <Key android:codes="12" android:keyLabel="7" />
+ 	    <Key android:codes="13" android:keyLabel="8" />
+ 	    <Key android:codes="14" android:keyLabel="9" />
+ 	    <Key android:codes="15" android:keyLabel="*" android:horizontalGap="11%p" />
+ 	    <Key android:codes="16" android:keyLabel=")" android:horizontalGap="11%p" />
+ 	    <Key android:codes="17" android:keyLabel="DEL" />
+ 	</Row>
+ 	
+ 	<Row>
+ 	    <Key android:codes="18" android:keyLabel="0" />
+ 	    <Key android:codes="29" android:keyLabel="." />
+ 	    <Key android:codes="20" android:keyLabel="@string/square_root" />
+ 	    <Key android:codes="21" android:keyLabel="/" android:horizontalGap="11%p" />
+ 	    <Key android:codes="22" android:keyLabel="| |" android:horizontalGap="11%p"/>
+ 	    <Key android:codes="23" android:keyLabel="OK" />
+ 	</Row>
+  	
+ </Keyboard>

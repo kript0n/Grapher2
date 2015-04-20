@@ -1,0 +1,47 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" 
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/content_layout" >
+	
+	<LinearLayout
+	    android:id="@+id/mainLayout"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+	    android:baselineAligned="false"
+	    android:orientation="horizontal"
+	    android:paddingBottom="@dimen/activity_vertical_margin"
+	    android:paddingLeft="@dimen/activity_horizontal_margin"
+	    android:paddingRight="@dimen/activity_horizontal_margin"
+	    android:paddingTop="@dimen/activity_vertical_margin"
+	    tools:context=".MainActivity" >
+	
+	   <LinearLayout
+	       android:id="@+id/func_layout"
+	       android:layout_width="0dp"
+	       android:layout_height="match_parent"
+	       android:layout_weight="4.00"
+	       android:background="@drawable/border_right"
+	       android:orientation="vertical"
+           android:paddingLeft="@dimen/function_layout_padding"
+	       android:paddingRight="@dimen/function_layout_padding" >
+	       
+	       	    
+	    </LinearLayout>
+	
+	    <RelativeLayout
+	        android:id="@+id/graph_layout"
+	        android:layout_width="0dp"
+	        android:layout_height="match_parent"
+	        android:background="#FFF"
+	        android:alpha="0.0"
+	        android:layout_weight="10">
+	    </RelativeLayout>
+	
+	</LinearLayout>
+
+	
+</RelativeLayout>
