@@ -12,7 +12,9 @@ import android.graphics.Typeface;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
+import com.kripton.grapher.handlers.MultiTouchHandler;
 import com.kripton.grapher.imp.Graph;
+import com.kripton.grapher.interfaces.Input;
 
 import static android.graphics.Paint.ANTI_ALIAS_FLAG;
 
@@ -20,12 +22,18 @@ import static android.graphics.Paint.ANTI_ALIAS_FLAG;
 public class DrawThread implements Runnable {
 	
 
-	public DrawThread(SurfaceHolder surfaceHolder) {
-		this.surfaceHolder = surfaceHolder;
+	public DrawThread(SurfaceHolder _surfaceHolder, MultiTouchHandler _touchHandler) {
+
+		surfaceHolder = _surfaceHolder;
+		touchHandler = _touchHandler;
+		shiftY = 0;
+		shiftX = 0;
+
 	}
 	
 	
 	public void start() {
+
 		running = true;
 		renderThread = new Thread(this);
 		renderThread.start();
@@ -40,16 +48,17 @@ public class DrawThread implements Runnable {
 	
 	public void terminate() {
 
-        running = false;
-		Log.d("Threads", "Running has been set to false. Start terminating calculators");
+		Log.d("Threads", "Start terminating calculators");
+
 		/* Terminating calculators */
 		ListIterator<Graph> iter  = GraphList.listIterator();
-		while(iter.hasNext()) {
+		while(iter.hasNext())
+		{
 			iter.next().terminateCalculator();
 		}
 		Log.d("Threads", "Calculators has been terminated");
-		
 
+		running = false;
 		while(true) {
 			try {
 				renderThread.join();
@@ -58,6 +67,8 @@ public class DrawThread implements Runnable {
 				e.printStackTrace();
 			}			
 		}
+
+
 	}
 	
 	
@@ -68,9 +79,12 @@ public class DrawThread implements Runnable {
 		
 		/* Set anti-aliasing */
 		paint.setFlags(ANTI_ALIAS_FLAG);
-		
-		while(running) {
-			
+
+		while(running)
+		{
+			float shiftedCenterY = centerY + shiftY;
+			float shiftedCenterX = centerX + shiftX;
+
 			try {
 				
 				canvas = surfaceHolder.lockCanvas();
@@ -79,16 +93,20 @@ public class DrawThread implements Runnable {
 					continue;
 				}
 					
-				drawAxises(canvas);
+				drawAxises(canvas, shiftedCenterX, shiftedCenterY);
 
-				synchronized(GraphList) {
-					if(!GraphList.isEmpty()) {
+				synchronized(GraphList)
+				{
+					if(!GraphList.isEmpty())
+					{
 						ListIterator<Graph> graphIter = GraphList.listIterator(); 
 						Graph graph = null;
-						while(graphIter.hasNext()) {
+						while(graphIter.hasNext())
+						{
 							graph = graphIter.next();
-							if(graph.isCalculated()) {
-								graph.drawGraph(canvas, paint, centerX, centerY, scale);
+							if(graph.isCalculated())
+							{
+								graph.drawGraph(canvas, paint, shiftedCenterX, shiftedCenterY, scale);
 							}
 						}
 					}
@@ -102,25 +120,25 @@ public class DrawThread implements Runnable {
 		}
 	}
 	
-	
-	
-	
-	
+
 	
 	/*------------------DRAW X AND Y AXISES--------------------------*/
-	private void drawAxises (Canvas canvas) {
-		
+	private void drawAxises (Canvas canvas, float shiftedCenterX, float shiftedCenterY) {
+
 		//Clear screen
-		paint.setColor(Color.WHITE);
-		canvas.drawPaint(paint);
-		
+		if(paint != null)
+		{
+			paint.setColor(Color.WHITE);
+			canvas.drawPaint(paint);
+		}
+
 		//Set paint for drawing axises
 		paint.setColor(Color.BLACK);
 		paint.setStrokeWidth(2);
 		
 		//Draw axises with shift
-		canvas.drawLine(0, centerY+shiftY, viewWidth , centerY+shiftY, paint);
-		canvas.drawLine(centerX+shiftX, 0, centerX+shiftX, viewHeight, paint);
+		canvas.drawLine(0, shiftedCenterY, viewWidth , shiftedCenterY, paint);
+		canvas.drawLine(shiftedCenterX, 0, shiftedCenterX, viewHeight, paint);
 		
 		//Set font for writing marking
 		Typeface font = Typeface.defaultFromStyle(Typeface.ITALIC);
@@ -129,35 +147,29 @@ public class DrawThread implements Runnable {
 		
 		
 		//Draw zero in the middle
-		canvas.drawText("0", centerX-15, centerY+20, paint);
-		canvas.drawCircle(centerX, centerY, 2, paint);
+		canvas.drawText("0", shiftedCenterX-15, shiftedCenterY+20, paint);
+		canvas.drawCircle(shiftedCenterX, shiftedCenterY, 2, paint);
 		
 		//Draw horizontal marking
-		int maxX =(int) (viewWidth / scale / 2)+1;
-		for(int i=1;i<maxX;i++) {
-			
+		int maxX = (int)((viewWidth/2 - shiftX)/scale)+1;
+		int minX = (int)(((viewWidth/2 + shiftX)/scale)+1)*-1;
+
+		for(int i=minX;i<maxX;i++)
+		{
 			//Write right horizontal marking
-			canvas.drawText(String.valueOf(i), centerX+(i*scale)-8, centerY+20, paint);		
-			canvas.drawCircle(centerX+(i*scale), centerY, 2, paint);
-			
-			//Write left horizontal marking
-			canvas.drawText(String.valueOf(-i), centerX-(i*scale)-8, centerY+20, paint);
-			canvas.drawCircle(centerX-(i*scale), centerY, 2, paint);			
-			
+			canvas.drawText(String.valueOf(i), shiftedCenterX+(i*scale)-8, shiftedCenterY+20, paint);
+			canvas.drawCircle(shiftedCenterX+(i*scale), shiftedCenterY, 2, paint);
 		}
 		
 		//Draw vertical marking
-		int maxY = (int) (viewHeight / scale / 2)+1;
-		for(int j = 1; j < maxY; j++) {
-			
+		int maxY = (int)((viewHeight/2 + shiftY)/scale)+1;
+		int minY = (int)((viewHeight/2 - shiftY)/scale+1)*-1;
+
+		for(int j = minY; j < maxY; j++)
+		{
 			//Write top vertical marking
-			canvas.drawText(String.valueOf(j), centerX+8, centerY-(j*scale)+8, paint);
-			canvas.drawCircle(centerX, centerY-(j*scale), 2, paint);
-			
-			//Write bottom vertical marking
-			canvas.drawText(String.valueOf(-j), centerX+8, centerY+(j*scale)+8, paint);
-			canvas.drawCircle(centerX, centerY+(j*scale), 2, paint);	
-			
+			canvas.drawText(String.valueOf(j), shiftedCenterX+8, shiftedCenterY-(j*scale)+8, paint);
+			canvas.drawCircle(shiftedCenterX, shiftedCenterY-(j*scale), 2, paint);
 		}
 	}
 	/*-----------------------------------------------------------------*/
@@ -165,7 +177,7 @@ public class DrawThread implements Runnable {
 	
 	public void addGraph(Graph graph) {
 
-        graph.calculatePoints();
+        graph.calculatePoints(shiftX, shiftY);
 
         synchronized(GraphList)
         {
@@ -182,16 +194,39 @@ public class DrawThread implements Runnable {
 			ListIterator<Graph> iter = GraphList.listIterator();
 			Graph graphFromList = null;
 
-            while(iter.hasNext()) {
+            while(iter.hasNext())
+			{
 				graphFromList = iter.next();
-				if(graph == graphFromList) {
+				if(graph == graphFromList)
+				{
 					graphFromList.freePoints();
 					iter.remove();
 					break;
 				}
 			}
 		}
+	}
 
+
+	public void calcWithNewShift(int _shiftX, int _shiftY) {
+
+		synchronized (GraphList)
+		{
+			shiftX = _shiftX;
+			shiftY = _shiftY;
+
+			ListIterator<Graph> iter = GraphList.listIterator();
+			Graph graphFromList = null;
+
+			while(iter.hasNext())
+			{
+				graphFromList = iter.next();
+				if(graphFromList.isCalculated())
+				{
+					graphFromList.calculatePoints(_shiftX, _shiftY);
+				}
+			}
+		}
 	}
 	
 	
@@ -203,7 +238,9 @@ public class DrawThread implements Runnable {
 		this.viewWidth = viewWidth;
 		this.viewHeight = viewHeight;
 	}
-	
+
+
+	private MultiTouchHandler touchHandler;
 	
 	private Thread renderThread;
 	private List<Graph> GraphList = Collections.synchronizedList(new ArrayList<Graph>());
@@ -216,8 +253,8 @@ public class DrawThread implements Runnable {
 	private float centerX;
 	private float centerY;
 	private float scale;
-	private float shiftY;
-	private float shiftX;
+	private volatile int shiftY;
+	private volatile int shiftX;
 	private float viewHeight;
 	private float viewWidth;
 

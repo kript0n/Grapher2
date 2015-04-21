@@ -61,8 +61,8 @@ public class Graph {
 		
 		synchronized(points) {
 			ListIterator<Point> pointsIter = points.listIterator();
-			while(pointsIter.hasNext()) {
-				
+			while(pointsIter.hasNext())
+			{
 				Point point = pointsIter.next();
 				
 				/* If we have interruption in graph */
@@ -119,8 +119,8 @@ public class Graph {
 	
 	
 	/* Called from ExpFuncView in 'afterTextChanged' */
-	public void calculatePoints() {				
-		graphCalculator.calculatePoints();
+	public void calculatePoints(float shiftX, float shiftY) {
+		graphCalculator.calculatePoints(shiftX, shiftY);
 	}
 	
 	

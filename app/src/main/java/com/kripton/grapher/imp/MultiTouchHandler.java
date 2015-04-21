@@ -12,6 +12,7 @@ import com.kripton.grapher.imp.Pool.PoolObjectFactory;
 import com.kripton.grapher.interfaces.TouchHandler;
 
 public class MultiTouchHandler implements TouchHandler {
+
 	boolean[] isTouched = new boolean[20];
 	int[] touchX = new int[20];
 	int[] touchY = new int[20];

@@ -1,5 +1,7 @@
 package com.kripton.grapher.GraphCalculator;
 
+import android.util.Log;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +31,7 @@ public class Calculator extends GraphCalculatorParent  {
 
 	/*---------------------------------CALCULATE pointsListList FOR DRAWING------------------------------*/
 	@SuppressWarnings("unchecked")
-	public void calculatePoints(Stack<String> stackRPN) throws CalculateException {
+	public void calculatePoints(Stack<String> stackRPN, float shiftX, float shiftY) throws CalculateException {
 		
 		calculated = false;
 		accessRangeError = false;
@@ -42,13 +44,22 @@ public class Calculator extends GraphCalculatorParent  {
 		Point lastPoint = new Point(0, 0);
 		
 		/* get max value on 'x' axis */
-		int maxX = (int)(graphViewWidth/scale/2)+1;						
-		
+		//int maxX = (int)(graphViewWidth/scale/2)+1;
+		int maxX = (int)((graphViewWidth/2 - shiftX)/scale)+1;
+		int minX = (int)(((graphViewWidth/2 + shiftX)/scale)+1)*-1;
+
+		/* Get max and min values on 'y' axis */
+		float maxY = (graphViewHeight/2 + shiftY)/scale;
+		float minY = (graphViewHeight/2 - shiftY)/scale*-1;
+
+		Log.d("TEvents", "X: " + Integer.toString(maxX) + ":" + Integer.toString(minX));
+		Log.d("TEvents", "Y: " + Float.toString(maxY) + ":" + Float.toString(minY));
+
 		synchronized(pointsList) {
-			for(double i=-maxX; i<maxX; i++) {
-				for(double j=0; j < scale; j++) {
+			for(float i=minX; i<maxX; i++) {
+				for(float j=0; j < scale; j++) {
 					
-					double xPoint = i+j/scale;
+					float xPoint = i+j/scale;
 					
 					stackRPN = (Stack<String>)stackRPNCopy.clone();
 					stackCalculate.clear();
@@ -63,9 +74,8 @@ public class Calculator extends GraphCalculatorParent  {
 						pointsList.add(null);
 						continue;
 					}
-					
-					
-					
+
+
 					if(!stackCalculate.isEmpty()) {
 						
 						/* Get new point from pool */
@@ -74,11 +84,9 @@ public class Calculator extends GraphCalculatorParent  {
 						Point currentPoint =  pointsPool.newObject();
 						currentPoint.firstPoint = false;
 						
-						
 						/* Multiple on -1 because y-axis is reversed */
 						currentPoint.x = xPoint;
-						currentPoint.y = -1*stackCalculate.pop();			
-						
+						currentPoint.y = -1*stackCalculate.pop();
 						
 						/* if after calculating we have more than one number in result */
 						if(!stackCalculate.empty()) {												 
@@ -96,12 +104,13 @@ public class Calculator extends GraphCalculatorParent  {
 
 						
 						/* if last and current pointsListList are both out of visible part of screen */
-						if(outOfScreen(lastPoint) && outOfScreen(currentPoint)) {
-							
+						if((lastPoint.y > maxY || lastPoint.y < minY)
+								&& (currentPoint.y > maxY || currentPoint.y < minX)) {
+
 							/* if pointsListList are placed besides different parts of screen */
 							/* dividing height by 2 because pointsListList coordinates calculated from middle */
-							if((lastPoint.y > scaledViewHeight/2 && currentPoint.y < -scaledViewHeight/2) 
-									|| (lastPoint.y < -scaledViewHeight/2 && currentPoint.y > scaledViewHeight/2)) {
+							if((lastPoint.y > maxY && currentPoint.y < minY)
+									|| (lastPoint.y < minY && currentPoint.y > maxY)) {
 								
 								if(lastPoint.firstPoint) {
 									pointsList.add(lastPoint);
@@ -140,14 +149,14 @@ public class Calculator extends GraphCalculatorParent  {
 	
 	
 	/* CALCULATE FUNCTION IN POST NOTATION AFTER PARSING. USED IN CALCULATE pointsListList FUNCTION FOR EACH POINT. */
-	private void calculatePostNotation(Stack<String> stackRPN, double xPoint) throws CalculateException {
+	private void calculatePostNotation(Stack<String> stackRPN, float xPoint) throws CalculateException {
 		
-		double buf = 0;
+		float buf = 0.0f;
 		
 		while(!stackRPN.isEmpty()) {
 			
 			if(isNumber(stackRPN.lastElement())) {
-				buf = Double.parseDouble(stackRPN.pop());
+				buf = Float.parseFloat(stackRPN.pop());
 				stackCalculate.push(buf);
 			}
 			else if(isVariable(stackRPN.lastElement())) {
@@ -169,13 +178,13 @@ public class Calculator extends GraphCalculatorParent  {
 				
 				if(stackCalculate.size() >= 2) {
 					stackRPN.pop();
-					double first = stackCalculate.pop();
+					float first = stackCalculate.pop();
 					
 					if(stackCalculate.isEmpty()) {
 						throw new CalculateException("Less than 2 numbers in stack when trying to substract");
 					}
 					
-					double second = stackCalculate.pop();
+					float second = stackCalculate.pop();
 					stackCalculate.push(first+second);
 				}
 				else {
@@ -187,13 +196,13 @@ public class Calculator extends GraphCalculatorParent  {
 				
 				if(stackCalculate.size() >= 2) {					
 					stackRPN.pop();
-					double first = stackCalculate.pop();
+					float first = stackCalculate.pop();
 					
 					if(stackCalculate.isEmpty()) {
 						throw new CalculateException("Less than 2 numbers in stack when trying to substract");
 					}
 					
-					double second = stackCalculate.pop();
+					float second = stackCalculate.pop();
 					stackCalculate.push(first-second);
 				}
 				else {
@@ -205,8 +214,8 @@ public class Calculator extends GraphCalculatorParent  {
 				
 				if(stackCalculate.size() >= 2) {
 					stackRPN.pop();
-					double first = stackCalculate.pop(); 
-					double second = stackCalculate.pop();
+					float first = stackCalculate.pop(); 
+					float second = stackCalculate.pop();
 					stackCalculate.push(first*second);
 				}
 				else {
@@ -216,46 +225,52 @@ public class Calculator extends GraphCalculatorParent  {
 			}
 			else if(stackRPN.lastElement().equals("/")) {
 				
-				if(stackCalculate.size() >= 2) {
+				if(stackCalculate.size() >= 2)
+				{
 					stackRPN.pop();
-					double first = stackCalculate.pop(); 
-					double second = stackCalculate.pop();
-					if(second == 0) {
+					float first = stackCalculate.pop();
+					float second = stackCalculate.pop();
+					if(second == 0)
+					{
 						accessRangeError = true;
 						break;
 					}
 					stackCalculate.push(second/first);
 				}
-				else {
+				else
+				{
 					throw new CalculateException("Less than 2 numbers in stack when trying to divide");
 				}
 				
 			}
-			else if(stackRPN.lastElement().equals("^")) {
-				
+			else if(stackRPN.lastElement().equals("^"))
+			{
 				stackRPN.pop();
-				double first = stackCalculate.pop();
+				float first = stackCalculate.pop();
 				
-				if(stackCalculate.isEmpty()) {
+				if(stackCalculate.isEmpty())
+				{
 					throw new CalculateException("Less than 2 numbers in stack");
 				}
 				
-				double second = stackCalculate.pop();
-				stackCalculate.push(Math.pow(first, second));
+				float second = stackCalculate.pop();
+				stackCalculate.push((float)Math.pow(first, second));
 				
 			}
-			else if(isFunction(stackRPN.lastElement())) {
-				
+			else if(isFunction(stackRPN.lastElement()))
+			{
 				String function = stackRPN.pop();
 				
 				//If we have no number to call function with
-				if(stackCalculate.isEmpty()) {
+				if(stackCalculate.isEmpty())
+				{
 					throw new CalculateException("Calculate stack is empty when call function");
 				}
 				
-				double first = stackCalculate.pop();
-				stackCalculate.push(callFunction(function, first));
-				if(accessRangeError) {
+				float first = stackCalculate.pop();
+				stackCalculate.push((float)callFunction(function, first));
+				if(accessRangeError)
+				{
 					break;
 				}
 				
@@ -277,7 +292,7 @@ public class Calculator extends GraphCalculatorParent  {
 	
 	
 	/*----------------------------CALL FUNCTION BY IT'S NAME--------------------------- */
-	private double callFunction(String func, double val) {
+	private double callFunction(String func, float val) {
 		if(func.equals("abs")) {
 			return Math.abs(val);
 		}
@@ -320,7 +335,7 @@ public class Calculator extends GraphCalculatorParent  {
 			return 1.0 / Math.tan(val);
 		}
 		else if(func.equals("acot")) {        
-			double cot = 1.0 / Math.tan(val);
+			float cot = (float)(1.0 / Math.tan(val));
 			return Math.atan(1.0 / cot);
 		}		
 		else if(func.equals("coth")) {
@@ -334,7 +349,7 @@ public class Calculator extends GraphCalculatorParent  {
 			return Math.log(val);
 		}
 		else if(func.equals("log")) {
-			if(val <= 0) { 
+			if(val <= 0) {
 				accessRangeError = true;
 				return 0;
 			}
@@ -356,12 +371,14 @@ public class Calculator extends GraphCalculatorParent  {
 	}
 	
 	
+	/*
 	private boolean outOfScreen(Point point) {
-		if(Math.abs(point.y) > scaledViewHeight/2) {
+		if(point.y > maxY || point.y < minY) {
 			return true;
 		}
 		return false;
 	}
+	*/
 	
 	
 	public boolean isCalculated() {
@@ -386,6 +403,7 @@ public class Calculator extends GraphCalculatorParent  {
 	
 	public void setGraphViewInfo(int viewWidth, int viewHeight, int _scale) {
 		graphViewWidth = viewWidth;
+		graphViewHeight = viewHeight;
 		scaledViewHeight = viewHeight / _scale;
 		scale = _scale;
 	}
@@ -395,13 +413,11 @@ public class Calculator extends GraphCalculatorParent  {
 	private boolean accessRangeError = false;
 	private float scaledViewHeight = 0.0f;
 	private float graphViewWidth = 0.0f;
+	private float graphViewHeight = 0.0f;
 	private float scale = 0.0f;
 
-	private float shiftX = 0.0f;
-	private float shiftY = 0.0f;
-
-	private Stack<Double> stackCalculate = new Stack<Double>();
-	private Map<String, Double> variables = new HashMap<String, Double>();
+	private Stack<Float> stackCalculate = new Stack<Float>();
+	private Map<String, Float> variables = new HashMap<String, Float>();
 	
 	private List<Point> pointsList = null;
 	

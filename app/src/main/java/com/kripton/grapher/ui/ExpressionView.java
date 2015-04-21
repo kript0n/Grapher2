@@ -78,7 +78,7 @@ public class ExpressionView extends EditText implements TextWatcher {
 		
 		/*Set new expression then calculating points and add graph to graphs view*/
 		graph.setExpression(arg0.toString());
-		graph.calculatePoints();
+		//graph.calculatePoints();
 		graphView.addGraph(graph);
 		
 	}	
