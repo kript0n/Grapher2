@@ -47,9 +47,9 @@ public class GraphView extends SurfaceView implements SurfaceHolder.Callback, Ru
 		drawThread.setDrawInfo(centerX, centerY, scale, viewWidth, viewHeight);
 		drawThread.start();
 
-		eventsThread = new Thread(this);
-		running = true;
-		eventsThread.start();
+		//eventsThread = new Thread(this);
+		//running = true;
+		//eventsThread.start();
 	}
 
 

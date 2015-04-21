@@ -74,14 +74,54 @@ public class DrawThread implements Runnable {
 	
 	@Override
 	public void run() {
-		
+
 		Canvas canvas = null;
 		
 		/* Set anti-aliasing */
 		paint.setFlags(ANTI_ALIAS_FLAG);
 
+		int firstMoveX = 0;
+		int firstMoveY = 0;
+		int lastMoveX = 0;
+		int lastMoveY = 0;
+
+		Graph graph = null;
+
 		while(running)
 		{
+			boolean hasFirstMove = false;
+			boolean dragged = false;
+
+			List<Input.TouchEvent> events = touchHandler.getTouchEvents();
+
+			for(int i=0; i<events.size(); i++)
+			{
+				Input.TouchEvent event = events.get(i);
+
+				if (event.type == Input.TouchEvent.TOUCH_DRAGGED)
+				{
+					if (!hasFirstMove)
+					{
+						firstMoveX = event.x;
+						firstMoveY = event.y;
+						hasFirstMove = true;
+					} else
+					{
+						lastMoveX = event.x;
+						lastMoveY = event.y;
+						dragged = true;
+					}
+				}
+			}
+
+			if(dragged)
+			{
+				shiftX += lastMoveX - firstMoveX;
+				shiftY += lastMoveY - firstMoveY;
+
+				calcWithNewShift(shiftX, shiftY);
+			}
+
 			float shiftedCenterY = centerY + shiftY;
 			float shiftedCenterX = centerX + shiftX;
 
@@ -99,11 +139,13 @@ public class DrawThread implements Runnable {
 				{
 					if(!GraphList.isEmpty())
 					{
-						ListIterator<Graph> graphIter = GraphList.listIterator(); 
-						Graph graph = null;
-						while(graphIter.hasNext())
+						//ListIterator<Graph> graphIter = GraphList.listIterator();
+
+						//while(graphIter.hasNext())
+						for(int i=0; i<GraphList.size(); i++)
 						{
-							graph = graphIter.next();
+							graph = GraphList.get(i);
+							//graph = graphIter.next();
 							if(graph.isCalculated())
 							{
 								graph.drawGraph(canvas, paint, shiftedCenterX, shiftedCenterY, scale);
